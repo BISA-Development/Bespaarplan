@@ -145,12 +145,13 @@ input,select{font-family:var(--body);font-size:14px;color:var(--fg);background:v
           <label class="full"><span id="frankLbl">Stroom en gas bij Frank Energie, p/m (€)</span><input id="frank" type="number" step="0.01" value="90"></label>
           <label class="full" data-m="none">Extra stroom warmtepomp, p/m (€)<input id="extraStroom" type="number" step="0.01" placeholder="automatisch"><span class="hint" id="extraHint"></span></label>
           <div class="full" role="group" aria-label="Financiering">
-            <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Financiering (één of meer aanvinken)</div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Financiering (aanvinken wat van toepassing is)</div>
             <div class="checks">
               <label class="chk"><input type="checkbox" id="useS"> SVn</label>
               <label class="chk"><input type="checkbox" id="useW" checked> Warmtefonds</label>
               <label class="chk"><input type="checkbox" id="useG"> GroenBudget</label>
             </div>
+            <div class="hint" id="eigenHint" hidden style="margin-top:6px">Niets aangevinkt: de klant betaalt uit eigen middelen. Het plan laat de financiering weg en toont de terugverdientijd.</div>
           </div>
           <div class="finblock full" id="blkS" hidden>
             <div class="hint" style="font-weight:600;color:var(--accent)">SVn</div>
@@ -707,7 +708,7 @@ function data(){
   const nieuw=energieNieuw+finMnd;
   const invest=num("invest"),btw=HAS_BAT?num("btw"):0,isde=HAS_WP?num("isde"):0;
   const wp=WP[d.wpModel]||WP.flint;
-  return {...d,combi,parts,boeteParts,wfPart,finNaam,finKort,opwek,direct,terug,afname,gas,tarief,...kstar(),stroomNu:num("stroomNu"),stroomNa,gasMnd,frank:energieNieuw,energieNieuw,looptijd,finBedrag,finMnd,
+  return {...d,combi,nofin:parts.length===0,parts,boeteParts,wfPart,finNaam,finKort,opwek,direct,terug,afname,gas,tarief,...kstar(),stroomNu:num("stroomNu"),stroomNa,gasMnd,frank:energieNieuw,energieNieuw,looptijd,finBedrag,finMnd,
     gasTariefAuto,gasTarief,gasBesp,gasRest,gasBespJaar,gasBespMnd,wp,
     totVerbruik:direct+afname, directPct:opwek?direct/opwek*100:0, co2:gas*1.78, co2Besp:gasBesp*1.78,
     oud,nieuw,verschil:Math.round(nieuw)-Math.round(oud),naLooptijd:Math.round(oud)-Math.round(energieNieuw),
@@ -728,8 +729,8 @@ const foot=d=>'<div class="foot">'+T("Jouw persoonlijke bespaarplan","Your perso
 /* ---------- pagina's ---------- */
 function p1(d){
   const F=[T("Besparen","Save money"),T("Onafhankelijker","More independent"),T("Milieu","Environment")];
-  const cards=({drie:[[F[0],T(`Vanaf 2027 betaal je zonder maatregelen circa ${eur(d.oud)} per maand aan stroom en gas. Met dit plan leg je het grootste deel daarvan ${n(d.looptijd)} jaar vast en ben je veel minder gevoelig voor stijgende energieprijzen.`,
-                                  `From 2027, without any changes, you will pay around ${eur(d.oud)} a month for electricity and gas. With this plan you fix most of that for ${n(d.looptijd)} years and become far less sensitive to rising energy prices.`)],
+  const cards=({drie:[[F[0],T(`Vanaf 2027 betaal je zonder maatregelen circa ${eur(d.oud)} per maand aan stroom en gas. ${d.nofin?"Met dit plan verlaag je je energiekosten blijvend en ben je veel minder gevoelig voor stijgende energieprijzen.":`Met dit plan leg je het grootste deel daarvan ${n(d.looptijd)} jaar vast en ben je veel minder gevoelig voor stijgende energieprijzen.`}`,
+                                  `From 2027, without any changes, you will pay around ${eur(d.oud)} a month for electricity and gas. ${d.nofin?"With this plan you lower your energy costs for good and become far less sensitive to rising energy prices.":`With this plan you fix most of that for ${n(d.looptijd)} years and become far less sensitive to rising energy prices.`}`)],
        [F[1],T(`Nu lever je ${n(d.terug)} kWh zonnestroom terug aan het net. Met de batterij en warmtepomp gebruik je die zelf, en verwarm je je huis grotendeels zonder gas.`,
                `Right now you send ${n(d.terug)} kWh of solar power back to the grid. With the battery and heat pump you use it yourself, and heat your home largely without gas.`)],
        [F[2],T(`${n(d.gas)} m³ gas staat voor ruim ${n(Math.floor(d.co2/100)*100)} kg CO2 per jaar. De warmtepomp neemt het grootste deel van je verwarming over, deels op je eigen zonnestroom.`,
@@ -858,7 +859,12 @@ function p4(d){
   const op=s=>`<div style="display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#5e9468">${s}</div>`;
   const vs=d.verschil, vsTxt=(vs>=0?"+ ":"− ")+eur(Math.abs(vs));
   const naTxt=d.naLooptijd>=0?eur(d.naLooptijd)+T(" lager"," lower"):eur(-d.naLooptijd)+T(" hoger"," higher");
-  const zin=vs>=0?T(`Tijdens de looptijd betaal je bij de huidige energieprijzen ${eur(vs)} per maand meer dan zonder plan. Daar staat tegenover dat ${n(d.vast)}% van je nieuwe maandlast vastligt en niet meestijgt met de energieprijzen.`,
+  const besJaar=-vs*12, netInv=Math.max(0,d.invest-d.btw-d.isde), tvt=besJaar>0?netInv/besJaar:0;
+  const tvtTxt=besJaar>0?`± ${n(tvt)} ${T("jaar","yrs")}`:"–";
+  const zin=d.nofin?(vs<0?T(`Je betaalt bij de huidige energieprijzen ${eur(-vs)} per maand minder dan zonder plan: ${eur(besJaar)} per jaar. Na aftrek van ${({drie:"de btw-teruggave en de ISDE-subsidie",bat:"de btw-teruggave",wp:"de ISDE-subsidie"})[MODE]} investeer je netto ${eur(netInv)}. Die heb je in ${nf1.format(tvt)} jaar terugverdiend; daarna is de besparing puur voordeel.`,
+       `At current energy prices you pay ${eur(-vs)} a month less than without the plan: ${eur(besJaar)} a year. After ${({drie:"the VAT refund and the ISDE subsidy",bat:"the VAT refund",wp:"the ISDE subsidy"})[MODE]} your net investment is ${eur(netInv)}. You earn that back in ${nf1.format(tvt)} years; after that the saving is pure profit.`)
+     :T(`Bij de huidige energieprijzen betaal je ${eur(vs)} per maand meer dan zonder plan. Daar staat tegenover dat je minder afhankelijk bent van stijgende energieprijzen.`,`At current energy prices you pay ${eur(vs)} a month more than without the plan. In return, you are less dependent on rising energy prices.`))
+   :vs>=0?T(`Tijdens de looptijd betaal je bij de huidige energieprijzen ${eur(vs)} per maand meer dan zonder plan. Daar staat tegenover dat ${n(d.vast)}% van je nieuwe maandlast vastligt en niet meestijgt met de energieprijzen.`,
                     `During the loan term, at current energy prices, you pay ${eur(vs)} a month more than without the plan. In return, ${n(d.vast)}% of your new monthly cost is fixed and won't rise with energy prices.`)
                 :T(`Tijdens de looptijd betaal je bij de huidige energieprijzen ${eur(-vs)} per maand minder dan zonder plan. Bovendien ligt ${n(d.vast)}% van je nieuwe maandlast vast en stijgt die niet mee met de energieprijzen.`,
                    `During the loan term, at current energy prices, you pay ${eur(-vs)} a month less than without the plan. On top of that, ${n(d.vast)}% of your new monthly cost is fixed and won't rise with energy prices.`);
@@ -869,7 +875,8 @@ function p4(d){
   let finLbl, finSub;
   const kortNm=p=>p.key==="wf"?"Warmtefonds":p.naam;
   const renteTxt=p=>p.key==="wf"?`${pct(p.rente)}% ${T("bruto","gross")}`:`${pct(p.rente)}%`;
-  if(d.combi){
+  if(d.nofin){finLbl="";finSub="";}
+  else if(d.combi){
     finLbl=`${T("Financiering","Financing")} ${d.parts.map(kortNm).join(" + ")}${star}`;
     finSub=d.parts.map(p=>`${kortNm(p)} ${eur(p.bedrag)} · ${renteTxt(p)} · ${n(p.looptijd)} ${jr} → ${eur(p.mnd)}`).join("<br>");
   }else{
@@ -894,7 +901,7 @@ function p4(d){
   <div class="stepT">${T("Stap","Step")} 2 <span class="lt">|</span> ${T("Jouw nieuwe maandlast","Your new monthly cost")}</div>
   <div style="display:grid;grid-template-columns:1fr 26px ${d.combi?"1.75fr":"1.25fr"} 26px 1fr;gap:6px;margin-bottom:8px">
     ${big(MODE==="bat"?T("Stroom bij Frank Energie*","Electricity with Frank Energie*"):T("Stroom en gas bij Frank Energie*","Electricity and gas with Frank Energie*"),eur(d.frank))}${op("+")}
-    ${big(finLbl,eur(d.finMnd),finSub)}${op("=")}
+    ${d.nofin?big(T("Financiering","Financing"),eur(0),T("geen: betaald uit eigen middelen","none: paid from own funds")):big(finLbl,eur(d.finMnd),finSub)}${op("=")}
     ${big(T("Nieuwe maandlast totaal","New monthly cost total"),eur(d.nieuw),"",true)}
   </div>
   <p class="small" style="margin:6px 0 4px">* ${T("Het bedrag bij Frank Energie is een schatting op basis van jouw verbruik en opwek. Bij een dynamisch contract verandert de stroomprijs per uur of kwartier, waardoor je maandlast iets hoger of iets lager kan uitvallen.","The Frank Energie amount is an estimate based on your usage and generation. With a dynamic contract the electricity price changes every hour or quarter-hour, so your monthly cost may turn out slightly higher or lower.")}</p>
@@ -902,7 +909,7 @@ function p4(d){
 
   <div class="stepT">${T("Stap","Step")} 3 <span class="lt">|</span> ${T("Jouw maandlast vergeleken","Your monthly cost compared")}</div>
   <div style="display:grid;grid-template-columns:1fr 22px 1fr 1fr 1fr;gap:8px;margin-bottom:8px">
-    ${big(MODE==="wp"?(d.opwek>0?T("Maandlast vanaf 2027<br>zonder warmtepomp","Monthly cost from 2027<br>without heat pump"):T("Maandlast nu<br>zonder warmtepomp","Monthly cost now<br>without heat pump")):T("Maandlast vanaf 2027<br>zonder plan","Monthly cost from 2027<br>without the plan"),eur(d.oud))}${op("→")}${big(T("Nieuwe maandlast<br>tijdens de financiering","New monthly cost<br>during the loan"),eur(d.nieuw))}${big(T("Verschil per maand<br>tijdens de financiering","Difference per month<br>during the loan"),vsTxt)}${big(T(`Na ${n(d.looptijd)} jaar per maand<br>(financiering afgelost)`,`After ${n(d.looptijd)} years, per month<br>(loan repaid)`),naTxt,"",true)}
+    ${big(MODE==="wp"?(d.opwek>0?T("Maandlast vanaf 2027<br>zonder warmtepomp","Monthly cost from 2027<br>without heat pump"):T("Maandlast nu<br>zonder warmtepomp","Monthly cost now<br>without heat pump")):T("Maandlast vanaf 2027<br>zonder plan","Monthly cost from 2027<br>without the plan"),eur(d.oud))}${op("→")}${d.nofin?big(T("Nieuwe maandlast<br>met dit plan","New monthly cost<br>with this plan"),eur(d.nieuw))+big(T("Verschil per maand<br>met dit plan","Difference per month<br>with this plan"),vsTxt)+big(T("Terugverdientijd<br>netto investering","Payback period<br>net investment"),tvtTxt,"",true):big(T("Nieuwe maandlast<br>tijdens de financiering","New monthly cost<br>during the loan"),eur(d.nieuw))+big(T("Verschil per maand<br>tijdens de financiering","Difference per month<br>during the loan"),vsTxt)+big(T(`Na ${n(d.looptijd)} jaar per maand<br>(financiering afgelost)`,`After ${n(d.looptijd)} years, per month<br>(loan repaid)`),naTxt,"",true)}
   </div>
   <p class="p" style="font-size:11px;margin-bottom:14px">${zin}</p>
 
@@ -910,7 +917,7 @@ function p4(d){
   <table class="tbl tight">
    ${tr(T("Totale investering (incl. btw)","Total investment (incl. VAT)"),eur(d.invest))}
    ${d.parts.map(p=>tr(T("Financiering ","Financing ")+p.naam,"− "+eur(p.bedrag))).join("")}
-   ${tr(T("Eigen investering bij aanschaf","Own contribution at purchase"),eur(d.eigen),"tot")}
+   ${tr(d.nofin?T("Betaald uit eigen middelen","Paid from own funds"):T("Eigen investering bij aanschaf","Own contribution at purchase"),eur(d.eigen),"tot")}
    ${HAS_BAT?tr(T("Btw-teruggave thuisbatterij (na installatie)","VAT refund home battery (after installation)"),"− "+eur(d.btw)):""}
    ${HAS_WP?tr(T("ISDE-subsidie warmtepomp (na installatie)","ISDE subsidy heat pump (after installation)"),"− "+eur(d.isde)):""}
    ${tr(T("Netto eigen investering na teruggave","Net own contribution after refunds"),eur(d.nettoEigen),"tot")}
@@ -1077,9 +1084,9 @@ function pWP(d){
  </div>${foot(d)}</div>`;
 }
 function p5(d){
-  const st=[[T("Offerte op maat ondertekend","Tailored quote signed"),T("De offerte is onder voorbehoud van een duurzaamheidsfinanciering. Wordt de financiering afgewezen, dan wordt de overeenkomst kosteloos ontbonden, ook na de wettelijke bedenktijd van 14 dagen.","The quote is subject to sustainability financing being approved. If the financing is rejected, the agreement is cancelled free of charge, even after the statutory 14-day cooling-off period.")],
+  const st=[...(d.nofin?[[T("Offerte op maat ondertekend","Tailored quote signed"),T("Je ondertekent de offerte op maat. Daarna geldt de wettelijke bedenktijd van 14 dagen.","You sign the tailored quote. The statutory 14-day cooling-off period then applies.")]]:[[T("Offerte op maat ondertekend","Tailored quote signed"),T("De offerte is onder voorbehoud van een duurzaamheidsfinanciering. Wordt de financiering afgewezen, dan wordt de overeenkomst kosteloos ontbonden, ook na de wettelijke bedenktijd van 14 dagen.","The quote is subject to sustainability financing being approved. If the financing is rejected, the agreement is cancelled free of charge, even after the statutory 14-day cooling-off period.")],
     [T(`Aanvraag duurzaamheidsfinanciering (${d.finNaam})`,`Sustainability financing application (${d.finNaam})`),d.combi?T("Wij helpen je bij het aanvragen van de financieringen.","We help you apply for the loans."):T("Wij helpen je bij het aanvragen van de financiering.","We help you apply for the financing.")],
-    [T("Toekenning financiering","Financing approved"),T("Stuur de toekenning door naar je adviseur.","Forward the approval to your advisor.")],
+    [T("Toekenning financiering","Financing approved"),T("Stuur de toekenning door naar je adviseur.","Forward the approval to your advisor.")]]),
     [T("Technische schouw","Technical survey"),T("De installateur toetst het plan en maakt een definitief montageplan.","The installer checks the plan and draws up a final installation plan.")],
     [T("Overstap naar een dynamisch contract","Switch to a dynamic contract"),MODE==="bat"?T("Wij helpen je met de overstap van je stroom naar Frank Energie.","We help you switch your electricity to Frank Energie."):T("Wij helpen je met de overstap van stroom en gas naar Frank Energie.","We help you switch your electricity and gas to Frank Energie.")],
     [T("Installatie","Installation"),({drie:T("De installateur plaatst de warmtepomp en de thuisbatterij en koppelt alles in huis aan elkaar: je zonnepanelen, de batterij, de warmtepomp, je cv-ketel en het energiemanagementsysteem. Zo werkt alles samen als De Gouden Drie.","The installer fits the heat pump and the home battery and connects everything in your home: your solar panels, the battery, the heat pump, your boiler and the energy management system. That way everything works together as The Golden Three."),
@@ -1140,9 +1147,8 @@ try{const s=JSON.parse(localStorage.getItem(STORE)||"null");if(s){
 syncFin();
 $("f").addEventListener("input",render);
 $("f").addEventListener("submit",e=>e.preventDefault());
-function syncFin(){["S","W","G"].forEach(k=>{$("blk"+k).hidden=!$("use"+k).checked});}
+function syncFin(){["S","W","G"].forEach(k=>{$("blk"+k).hidden=!$("use"+k).checked});$("eigenHint").hidden=["S","W","G"].some(k=>$("use"+k).checked);}
 ["S","W","G"].forEach(k=>$("use"+k).addEventListener("change",e=>{
-  if(!["S","W","G"].some(x=>$("use"+x).checked)){e.target.checked=true;status("Kies minstens één financiering.");}
   syncFin();render();}));
 $("btnNew").addEventListener("click",()=>{$("confirmNew").hidden=false});
 $("noNew").addEventListener("click",()=>{$("confirmNew").hidden=true});
