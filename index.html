@@ -74,7 +74,10 @@ input,select{font-family:var(--body);font-size:14px;color:var(--fg);background:v
 .tbl .r{text-align:right;font-variant-numeric:tabular-nums}
 .tbl tr.tot td{font-weight:700;border-bottom:2px solid #5e9468;color:#2b3a2e}
 .c{text-align:center}
-.tbl.tight td{padding:6px 14px}.compact .tbl.tight td{padding:4.5px 14px}.compact .stepT{margin-bottom:8px}.tbl.tight th{padding:7px 14px}
+.hint.warn{color:#b4532f}
+.checks{display:flex;flex-wrap:wrap;gap:6px}.chk{flex-direction:row!important;align-items:center;gap:6px!important;background:var(--field);border:1px solid var(--line);border-radius:7px;padding:7px 10px;color:var(--fg)!important;font-size:13px!important;cursor:pointer}.chk input{width:auto;margin:0;accent-color:var(--accent)}
+.finblock{border-left:3px solid var(--accent);padding-left:10px;display:flex;flex-direction:column;gap:6px}
+.tbl.tight td{padding:6px 14px}.compact .tbl.tight td{padding:4.5px 14px}.compact .stepT{margin-bottom:8px}.compact3 .tbl.tight td{padding:3.5px 14px}.compact3 .tbl.tight th{padding:5px 14px}.compact3 .stepT{margin-bottom:6px;font-size:16px}.tbl.tight th{padding:7px 14px}
 .box{background:#f2f4e9;border-radius:8px;padding:14px 16px}
 .wbox{border:1px solid #dfe5da;border-radius:8px;padding:14px 16px}
 .small{font-size:9.5px;color:#5b6a5f;line-height:1.5}
@@ -141,16 +144,41 @@ input,select{font-family:var(--body);font-size:14px;color:var(--fg);background:v
         <div class="grid">
           <label class="full"><span id="frankLbl">Stroom en gas bij Frank Energie, p/m (€)</span><input id="frank" type="number" step="0.01" value="90"></label>
           <label class="full" data-m="none">Extra stroom warmtepomp, p/m (€)<input id="extraStroom" type="number" step="0.01" placeholder="automatisch"><span class="hint" id="extraHint"></span></label>
-          <label class="full">Financiering
-            <select id="fin"><option value="wf">Nationaal Warmtefonds</option><option value="svn">SVn</option><option value="combi">Combinatie: SVn + Warmtefonds</option></select></label>
-          <div class="full hint" data-combi hidden style="font-weight:600;color:var(--accent)">Deel 1: SVn</div>
-          <label>Rente (%)<input id="rente" type="number" step="0.01" value="4.93"></label>
-          <label>Looptijd (jaar)<input id="looptijd" type="number" value="15"></label>
-          <label class="full">Maandbedrag financiering (€)<input id="finMnd" type="number" step="0.01" placeholder="automatisch"><span class="hint" id="finHint"></span></label>
-          <div class="full hint" data-combi hidden style="font-weight:600;color:var(--accent);margin-top:6px">Deel 2: Nationaal Warmtefonds</div>
-          <label data-combi hidden>Rente WF (%)<input id="rente2" type="number" step="0.01" value="4.93"></label>
-          <label data-combi hidden>Looptijd WF (jaar)<input id="looptijd2" type="number" value="15"></label>
-          <label class="full" data-combi hidden>Maandbedrag Warmtefonds (€)<input id="finMnd2" type="number" step="0.01" placeholder="automatisch"><span class="hint" id="finHint2"></span></label>
+          <div class="full" role="group" aria-label="Financiering">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Financiering (één of meer aanvinken)</div>
+            <div class="checks">
+              <label class="chk"><input type="checkbox" id="useS"> SVn</label>
+              <label class="chk"><input type="checkbox" id="useW" checked> Warmtefonds</label>
+              <label class="chk"><input type="checkbox" id="useG"> GroenBudget</label>
+            </div>
+          </div>
+          <div class="finblock full" id="blkS" hidden>
+            <div class="hint" style="font-weight:600;color:var(--accent)">SVn</div>
+            <div class="grid">
+              <label class="full">Bedrag SVn (€)<input id="finBedragS" type="number" value=""></label>
+              <label>Rente (%)<input id="renteS" type="number" step="0.01" value="1.7" placeholder=""></label>
+              <label>Looptijd (jaar)<input id="looptijdS" type="number" value="15"></label>
+              <label class="full">Maandbedrag SVn (€)<input id="finMndS" type="number" step="0.01" placeholder="automatisch"><span class="hint" id="finHintS"></span></label>
+            </div>
+          </div>
+          <div class="finblock full" id="blkW" hidden>
+            <div class="hint" style="font-weight:600;color:var(--accent)">Warmtefonds</div>
+            <div class="grid">
+              <label class="full">Bedrag Warmtefonds (€)<input id="finBedragW" type="number" value=""></label>
+              <label>Rente (%)<input id="renteW" type="number" step="0.01" value="4.93" placeholder=""></label>
+              <label>Looptijd (jaar)<input id="looptijdW" type="number" value="15"></label>
+              <label class="full">Maandbedrag Warmtefonds (€)<input id="finMndW" type="number" step="0.01" placeholder="automatisch"><span class="hint" id="finHintW"></span></label>
+            </div>
+          </div>
+          <div class="finblock full" id="blkG" hidden>
+            <div class="hint" style="font-weight:600;color:var(--accent)">GroenBudget</div>
+            <div class="grid">
+              <label class="full">Bedrag GroenBudget (€)<input id="finBedragG" type="number" value=""></label>
+              <label>Rente (%)<input id="renteG" type="number" step="0.01" value="" placeholder="zelf invullen"></label>
+              <label>Looptijd (jaar)<input id="looptijdG" type="number" value="15"></label>
+              <label class="full">Maandbedrag GroenBudget (€)<input id="finMndG" type="number" step="0.01" placeholder="zelf invullen"><span class="hint" id="finHintG"></span></label>
+            </div>
+          </div>
         </div>
       </fieldset>
       <fieldset data-m="drie bat"><legend>Thuisbatterij KSTAR</legend>
@@ -178,8 +206,6 @@ input,select{font-family:var(--body);font-size:14px;color:var(--fg);background:v
           <label class="full">Totale investering incl. btw (€)<input id="invest" type="number" value="24104"></label>
           <label data-m="drie bat">Btw-teruggave batterij (€)<input id="btw" type="number" value="2016"></label>
           <label data-m="drie wp">ISDE-subsidie (€)<input id="isde" type="number" value="2350"></label>
-          <label class="full"><span id="finBedragLbl">Gefinancierd bedrag (€)</span><input id="finBedrag" type="number" value="24104"></label>
-          <label class="full" data-combi hidden>Gefinancierd via Warmtefonds (€)<input id="finBedrag2" type="number" value="0"></label>
         </div>
         <div class="calc" id="calc2" style="margin-top:10px"></div>
       </fieldset>
@@ -613,16 +639,18 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 <script>
 (function(){
 const ADV={get naam(){return esc(document.getElementById("advNaam").value.trim()||T("Naam adviseur","Advisor name"))},get mail(){return esc(document.getElementById("advMail").value.trim()||"e-mail")},get tel(){return esc(document.getElementById("advTel").value.trim()||T("telefoon","phone"))}};
-const FIN={wf:{naam:"Nationaal Warmtefonds",kort:"het Warmtefonds",kortEn:"the Warmtefonds",rente:4.93},svn:{naam:"SVn",kort:"SVn",kortEn:"SVn",rente:1.7}};
+const FIN={svn:{k:"S",naam:"SVn",kort:"SVn",kortEn:"SVn",rente:1.7,auto:true},wf:{k:"W",naam:"Nationaal Warmtefonds",kort:"het Warmtefonds",kortEn:"the Warmtefonds",rente:4.93,auto:true},gb:{k:"G",naam:"GroenBudget",kort:"GroenBudget",kortEn:"GroenBudget",rente:0,auto:false}};
 const MODE=({"#thuisbatterij":"bat","#warmtepomp":"wp"})[location.hash]||"drie";
 window.addEventListener("hashchange",()=>location.reload());
 document.querySelectorAll(".modes a").forEach(a=>{if(a.dataset.mode===MODE)a.setAttribute("aria-current","page")});
 const HAS_BAT=MODE!=="wp", HAS_WP=MODE!=="bat";
 const TITLES={drie:"De Gouden Drie",bat:"Thuisbatterij",wp:"Warmtepomp"};
 const WP={flint:{naam:"Flint",type:"P40",kw:"6 kW",db:"37,5 dB(A)",isde:2350},sparrow:{naam:"Sparrow",type:"P60",kw:"9 kW",db:"40,5 dB(A)",isde:2575},bb60:{naam:"Blackbird",type:"P60",kw:"9 kW",db:"38 dB(A)",isde:2575},bb80:{naam:"Blackbird",type:"P80",kw:"11 kW",db:"38 dB(A)",isde:3025}};
-const DEF={drie:{},bat:{frank:"30",invest:"10500",finBedrag:"10500",isde:"0"},wp:{invest:"8500",finBedrag:"8500",btw:"0"}};
-const FIELDS=["kstarOn","omv","mods","wpOn","wpModel","gasTarief","extraStroom","naam","adres","opwek","direct","terug","afname","gas","tarief","stroomNu","stroomNa","gasMnd","frank","fin","rente","looptijd","finMnd","invest","btw","isde","finBedrag","lang","rente2","looptijd2","finMnd2","finBedrag2"];
+const DEF={drie:{finBedragW:"24104"},bat:{frank:"30",invest:"10500",finBedragW:"10500",isde:"0"},wp:{invest:"8500",finBedragW:"8500",btw:"0"}};
+const FIELDS=["kstarOn","omv","mods","wpOn","wpModel","gasTarief","extraStroom","naam","adres","opwek","direct","terug","afname","gas","tarief","stroomNu","stroomNa","gasMnd","frank","invest","btw","isde","lang","useS","useW","useG","finBedragS","renteS","looptijdS","finMndS","finBedragW","renteW","looptijdW","finMndW","finBedragG","renteG","looptijdG","finMndG"];
 const $=id=>document.getElementById(id);
+const getF=f=>{const el=$(f);return el.type==="checkbox"?(el.checked?"1":""):el.value};
+const setF=(f,v)=>{const el=$(f);if(el.type==="checkbox")el.checked=!!v;else el.value=v};
 const STORE="bespaarplan-gt-v2-"+MODE;
 
 let LANG="nl";
@@ -649,7 +677,7 @@ function kstar(){
 const AFTREK=0.3756;
 function finPart(key,renteId,looptijdId,bedragId,mndId){
   const f=FIN[key], rente=num(renteId), looptijd=num(looptijdId)||15, bedrag=num(bedragId);
-  const auto=annuity(bedrag,rente,looptijd);
+  const auto=f.auto?annuity(bedrag,rente,looptijd):0;
   const mnd=$(mndId).value!==""?num(mndId):auto;
   const aftrekMnd=key==="wf"?bedrag*rente/100*AFTREK/12:0;
   return {key,naam:f.naam,kort:LANG==="en"?f.kortEn:f.kort,rente,looptijd,bedrag,auto,mnd,
@@ -657,15 +685,16 @@ function finPart(key,renteId,looptijdId,bedragId,mndId){
 }
 function data(){
   LANG=$("lang").value==="en"?"en":"nl";
-  const d={};FIELDS.forEach(f=>d[f]=$(f).value);
-  const combi=d.fin==="combi";
-  const parts=combi?[finPart("svn","rente","looptijd","finBedrag","finMnd"),finPart("wf","rente2","looptijd2","finBedrag2","finMnd2")]
-                   :[finPart(d.fin==="svn"?"svn":"wf","rente","looptijd","finBedrag","finMnd")];
+  const d={};FIELDS.forEach(f=>d[f]=getF(f));
+  const parts=["svn","wf","gb"].filter(key=>$("use"+FIN[key].k).checked).map(key=>{const k=FIN[key].k;return finPart(key,"rente"+k,"looptijd"+k,"finBedrag"+k,"finMnd"+k)});
+  const combi=parts.length>1;
   const wfPart=parts.find(p=>p.key==="wf")||null;
   const finMnd=parts.reduce((a,p)=>a+p.mnd,0), finBedrag=parts.reduce((a,p)=>a+p.bedrag,0);
-  const looptijd=Math.max(...parts.map(p=>p.looptijd));
-  const finNaam=combi?T("SVn en Nationaal Warmtefonds","SVn and Nationaal Warmtefonds"):parts[0].naam;
-  const finKort=combi?T("SVn en het Warmtefonds","SVn and the Warmtefonds"):parts[0].kort;
+  const looptijd=parts.length?Math.max(...parts.map(p=>p.looptijd)):15;
+  const lijst=a=>a.length<2?a.join(""):a.slice(0,-1).join(", ")+T(" en "," and ")+a[a.length-1];
+  const finNaam=lijst(parts.map(p=>p.naam));
+  const boeteParts=parts.filter(p=>p.key!=="gb");
+  const finKort=lijst(boeteParts.map(p=>p.kort));
   const opwek=num("opwek"),direct=num("direct"),terug=num("terug"),afname=num("afname");
   const gas=HAS_WP?num("gas"):0, tarief=num("tarief");
   const stroomNa=num("stroomNa"),gasMnd=HAS_WP?num("gasMnd"):0;
@@ -678,7 +707,7 @@ function data(){
   const nieuw=energieNieuw+finMnd;
   const invest=num("invest"),btw=HAS_BAT?num("btw"):0,isde=HAS_WP?num("isde"):0;
   const wp=WP[d.wpModel]||WP.flint;
-  return {...d,combi,parts,wfPart,finNaam,finKort,opwek,direct,terug,afname,gas,tarief,...kstar(),stroomNu:num("stroomNu"),stroomNa,gasMnd,frank:energieNieuw,energieNieuw,looptijd,finBedrag,finMnd,
+  return {...d,combi,parts,boeteParts,wfPart,finNaam,finKort,opwek,direct,terug,afname,gas,tarief,...kstar(),stroomNu:num("stroomNu"),stroomNa,gasMnd,frank:energieNieuw,energieNieuw,looptijd,finBedrag,finMnd,
     gasTariefAuto,gasTarief,gasBesp,gasRest,gasBespJaar,gasBespMnd,wp,
     totVerbruik:direct+afname, directPct:opwek?direct/opwek*100:0, co2:gas*1.78, co2Besp:gasBesp*1.78,
     oud,nieuw,verschil:Math.round(nieuw)-Math.round(oud),naLooptijd:Math.round(oud)-Math.round(energieNieuw),
@@ -838,21 +867,22 @@ function p4(d){
   /* financieringsblok */
   const hasWf=!!d.wfPart, star=hasWf?"**":"";
   let finLbl, finSub;
+  const kortNm=p=>p.key==="wf"?"Warmtefonds":p.naam;
+  const renteTxt=p=>p.key==="wf"?`${pct(p.rente)}% ${T("bruto","gross")}`:`${pct(p.rente)}%`;
   if(d.combi){
-    const [s,w]=d.parts;
-    finLbl=`${T("Financiering SVn + Warmtefonds","Financing SVn + Warmtefonds")}${star}`;
-    finSub=`SVn ${eur(s.bedrag)} · ${pct(s.rente)}% · ${n(s.looptijd)} ${jr} → ${eur(s.mnd)}<br>${T("Warmtefonds","Warmtefonds")} ${eur(w.bedrag)} · ${pct(w.rente)}% ${T("bruto","gross")} · ${n(w.looptijd)} ${jr} → ${eur(w.mnd)}`;
+    finLbl=`${T("Financiering","Financing")} ${d.parts.map(kortNm).join(" + ")}${star}`;
+    finSub=d.parts.map(p=>`${kortNm(p)} ${eur(p.bedrag)} · ${renteTxt(p)} · ${n(p.looptijd)} ${jr} → ${eur(p.mnd)}`).join("<br>");
   }else{
     const p=d.parts[0];
-    finLbl=`${T("Financiering","Financing")} ${p.naam}${star}<br>${pct(p.rente)}% ${p.key==="wf"?T("bruto","gross"):T("rente","interest")} · ${T("vast","fixed")} · ${n(p.looptijd)} ${jr}`;
+    finLbl=`${T("Financiering","Financing")} ${p.naam}${star}<br>${pct(p.rente)}% ${p.key==="wf"?T("bruto","gross"):T("rente","interest")}${p.key==="gb"?"":" · "+T("vast","fixed")} · ${n(p.looptijd)} ${jr}`;
     finSub=p.key==="wf"?T(`netto ca. ${nf1.format(p.nettoRente)}% · ca. ${eur(p.nettoMnd)} per maand`,`net approx. ${nf1.format(p.nettoRente)}% · approx. ${eur(p.nettoMnd)} a month`):"";
   }
   const w=d.wfPart;
   const noot2=!w?'<div style="height:10px"></div>':`<p class="small" style="margin:0 0 14px">** ${T(
-     `Bruto en netto rente. ${pct(w.rente)}% is de bruto rente: het percentage dat je aan het Warmtefonds betaalt. Omdat je met deze financiering je eigen woning verbetert, mag je de betaalde rente aftrekken van je inkomen in box 1, net als hypotheekrente. Je krijgt dan tot ruim 37% van de betaalde rente terug van de Belastingdienst. De netto rente komt daarmee uit op circa ${nf1.format(w.nettoRente)}%. In het eerste jaar betaal je zo netto circa ${eur(w.nettoMnd)} per maand ${d.combi?"voor het Warmtefonds-deel ":""}in plaats van ${eur(w.mnd)}.${d.combi?` Voor het SVn-deel is ${pct(d.parts[0].rente)}% al de netto rente.`:""} Dit regel je via je belastingaangifte en is niet meegerekend in de bedragen in dit plan. Het precieze voordeel hangt af van je inkomen en je hypotheek.`,
-     `Gross and net interest. ${pct(w.rente)}% is the gross rate: the percentage you pay to the Warmtefonds. Because this loan improves your own home, you may deduct the interest paid from your income in Box 1, just like mortgage interest. You then get back up to just over 37% of the interest paid from the Dutch Tax Administration (Belastingdienst). That brings the net rate to around ${nf1.format(w.nettoRente)}%. In the first year you therefore pay a net amount of around ${eur(w.nettoMnd)} a month ${d.combi?"for the Warmtefonds part ":""}instead of ${eur(w.mnd)}.${d.combi?` For the SVn part, ${pct(d.parts[0].rente)}% is already the net rate.`:""} You arrange this through your tax return, and it is not included in the amounts in this plan. The exact benefit depends on your income and your mortgage.`)}</p>`;
+     `Bruto en netto rente. ${pct(w.rente)}% is de bruto rente: het percentage dat je aan het Warmtefonds betaalt. Omdat je met deze financiering je eigen woning verbetert, mag je de betaalde rente aftrekken van je inkomen in box 1, net als hypotheekrente. Je krijgt dan tot ruim 37% van de betaalde rente terug van de Belastingdienst. De netto rente komt daarmee uit op circa ${nf1.format(w.nettoRente)}%. In het eerste jaar betaal je zo netto circa ${eur(w.nettoMnd)} per maand ${d.combi?"voor het Warmtefonds-deel ":""}in plaats van ${eur(w.mnd)}.${d.parts.some(p=>p.key==="svn")?` Voor het SVn-deel is ${pct(d.parts.find(p=>p.key==="svn").rente)}% al de netto rente.`:""} Dit regel je via je belastingaangifte en is niet meegerekend in de bedragen in dit plan. Het precieze voordeel hangt af van je inkomen en je hypotheek.`,
+     `Gross and net interest. ${pct(w.rente)}% is the gross rate: the percentage you pay to the Warmtefonds. Because this loan improves your own home, you may deduct the interest paid from your income in Box 1, just like mortgage interest. You then get back up to just over 37% of the interest paid from the Dutch Tax Administration (Belastingdienst). That brings the net rate to around ${nf1.format(w.nettoRente)}%. In the first year you therefore pay a net amount of around ${eur(w.nettoMnd)} a month ${d.combi?"for the Warmtefonds part ":""}instead of ${eur(w.mnd)}.${d.parts.some(p=>p.key==="svn")?` For the SVn part, ${pct(d.parts.find(p=>p.key==="svn").rente)}% is already the net rate.`:""} You arrange this through your tax return, and it is not included in the amounts in this plan. The exact benefit depends on your income and your mortgage.`)}</p>`;
   const terugVia=({drie:T("de btw-teruggave en de ISDE-subsidie","the VAT refund and the ISDE subsidy"),bat:T("de btw-teruggave","the VAT refund"),wp:T("de ISDE-subsidie","the ISDE subsidy")})[MODE];
-  return `<div class="page"><div class="corner"></div><div class="pin${d.combi?" compact":""}" style="padding-top:52px">
+  return `<div class="page"><div class="corner"></div><div class="pin${d.combi?" compact":""}${d.parts.length>2?" compact3":""}" style="padding-top:52px">
   <div style="display:flex;gap:14px;align-items:center;margin-bottom:14px"><div><div style="font-size:10.5px;letter-spacing:.14em;color:#5e9468;font-weight:600">${T("PERSOONLIJK BESPAARPLAN","PERSONAL SAVINGS PLAN")}</div><div class="h2" style="margin:0">${TT()[MODE]} <span class="lt">→</span></div></div><div style="font-size:11px;color:#5b6a5f;border-left:2px solid #e1e8d3;padding-left:14px;max-width:220px">${T("Indicatief overzicht van je maandelijkse en jaarlijkse kosten","Indicative overview of your monthly and yearly costs")}</div></div>
 
   <div class="stepT">${T("Stap","Step")} 1 <span class="lt">|</span> ${({drie:T("Jouw energiekosten vanaf 2027 zonder maatregelen","Your energy costs from 2027 without any changes"),bat:T("Jouw stroomkosten vanaf 2027 zonder maatregelen","Your electricity costs from 2027 without any changes"),wp:T("Jouw energiekosten zonder warmtepomp","Your energy costs without a heat pump")})[MODE]}</div>
@@ -862,7 +892,7 @@ function p4(d){
    <tr class="tot"><td>${T("Totaal","Total")}</td><td class="r">${eur(d.oud)}</td><td class="r">${eur(d.oud*12)}</td></tr></table>
 
   <div class="stepT">${T("Stap","Step")} 2 <span class="lt">|</span> ${T("Jouw nieuwe maandlast","Your new monthly cost")}</div>
-  <div style="display:grid;grid-template-columns:1fr 26px ${d.combi?"1.6fr":"1.25fr"} 26px 1fr;gap:6px;margin-bottom:8px">
+  <div style="display:grid;grid-template-columns:1fr 26px ${d.combi?"1.75fr":"1.25fr"} 26px 1fr;gap:6px;margin-bottom:8px">
     ${big(MODE==="bat"?T("Stroom bij Frank Energie*","Electricity with Frank Energie*"):T("Stroom en gas bij Frank Energie*","Electricity and gas with Frank Energie*"),eur(d.frank))}${op("+")}
     ${big(finLbl,eur(d.finMnd),finSub)}${op("=")}
     ${big(T("Nieuwe maandlast totaal","New monthly cost total"),eur(d.nieuw),"",true)}
@@ -886,7 +916,7 @@ function p4(d){
    ${tr(T("Netto eigen investering na teruggave","Net own contribution after refunds"),eur(d.nettoEigen),"tot")}
    ${d.over>0?tr(T("Je houdt na de teruggave over","Left over after refunds"),eur(d.over)):""}
   </table>
-  <div class="box" style="margin-top:10px;padding:10px 16px;font-size:11px"><b style="color:#2b3a2e">Tip:</b> ${d.over>0?T(`na de teruggave houd je ${eur(d.over)} over. Daarmee kun je extra aflossen op je financiering; bij ${d.finKort} kan dat zonder boete.`,`after the refunds you have ${eur(d.over)} left over. You can use it to make extra repayments on your loan; with ${d.finKort} this is possible without a penalty.`)
+  <div class="box" style="margin-top:10px;padding:10px 16px;font-size:11px"><b style="color:#2b3a2e">Tip:</b> ${d.over>0?T(`na de teruggave houd je ${eur(d.over)} over. Daarmee kun je extra aflossen op je financiering${d.boeteParts.length?`; bij ${d.finKort} kan dat zonder boete`:""}.`,`after the refunds you have ${eur(d.over)} left over. You can use it to make extra repayments on your loan${d.boeteParts.length?`; with ${d.finKort} this is possible without a penalty`:""}.`)
    :d.nettoEigen>0?T(`je eigen investering wordt na installatie met ${eur(d.terugTotaal)} verlaagd door ${terugVia}. Netto betaal je zo ${eur(d.nettoEigen)} zelf.`,`after installation your own contribution is reduced by ${eur(d.terugTotaal)} through ${terugVia}. Your net contribution is therefore ${eur(d.nettoEigen)}.`)
    :T(`je eigen investering van ${eur(d.eigen)} krijg je na installatie volledig terug via ${terugVia}. Netto investeer je dus € 0.`,`you get your own contribution of ${eur(d.eigen)} back in full after installation through ${terugVia}. Your net investment is therefore €0.`)}</div>
   </div>${foot(d)}</div>`;
@@ -1048,7 +1078,7 @@ function pWP(d){
 }
 function p5(d){
   const st=[[T("Offerte op maat ondertekend","Tailored quote signed"),T("De offerte is onder voorbehoud van een duurzaamheidsfinanciering. Wordt de financiering afgewezen, dan wordt de overeenkomst kosteloos ontbonden, ook na de wettelijke bedenktijd van 14 dagen.","The quote is subject to sustainability financing being approved. If the financing is rejected, the agreement is cancelled free of charge, even after the statutory 14-day cooling-off period.")],
-    [T(`Aanvraag duurzaamheidsfinanciering (${d.finNaam})`,`Sustainability financing application (${d.finNaam})`),d.combi?T("Wij helpen je bij het aanvragen van beide financieringen.","We help you apply for both loans."):T("Wij helpen je bij het aanvragen van de financiering.","We help you apply for the financing.")],
+    [T(`Aanvraag duurzaamheidsfinanciering (${d.finNaam})`,`Sustainability financing application (${d.finNaam})`),d.combi?T("Wij helpen je bij het aanvragen van de financieringen.","We help you apply for the loans."):T("Wij helpen je bij het aanvragen van de financiering.","We help you apply for the financing.")],
     [T("Toekenning financiering","Financing approved"),T("Stuur de toekenning door naar je adviseur.","Forward the approval to your advisor.")],
     [T("Technische schouw","Technical survey"),T("De installateur toetst het plan en maakt een definitief montageplan.","The installer checks the plan and draws up a final installation plan.")],
     [T("Overstap naar een dynamisch contract","Switch to a dynamic contract"),MODE==="bat"?T("Wij helpen je met de overstap van je stroom naar Frank Energie.","We help you switch your electricity to Frank Energie."):T("Wij helpen je met de overstap van stroom en gas naar Frank Energie.","We help you switch your electricity and gas to Frank Energie.")],
@@ -1082,15 +1112,14 @@ function render(){
   if(HAS_WP){$("gasHint").textContent="Gastarief automatisch: € "+nf2.format(d.gasTariefAuto)+" per m³ (gaskosten ÷ verbruik). Leeg laten = automatisch.";}
   if(false){$("extraHint").textContent="Automatisch: "+eur(d.extraAuto)+" p/m ("+n(d.extraKwh)+" kWh: bespaard gas × 8,8 kWh ÷ SCOP 4 × stroomtarief).";}
   $("kHint").textContent=(()=>{const k=kstar();return (k.capped?"Max. "+k.maxMods+" modules bij "+k.omv+" kW. ":"")+"Opslag "+nf2.format(k.kCap)+" kWh · "+k.kKw+" kW continu (max. "+nf2.format(k.kMax)+" kWh)";})();
-  $("finHint").textContent="Automatisch: "+eur(d.parts[0].auto)+" p/m (annuïtair). Leeg laten = automatisch.";
-  if(d.combi)$("finHint2").textContent="Automatisch: "+eur(d.parts[1].auto)+" p/m (annuïtair). Leeg laten = automatisch.";
+  d.parts.forEach(pp=>{const k=FIN[pp.key].k;$("finHint"+k).textContent=FIN[pp.key].auto?"Automatisch: "+eur(pp.auto)+" p/m (annuïtair). Leeg laten = automatisch.":(pp.mnd?"":"Vul de rente en het maandbedrag van GroenBudget zelf in.");$("finHint"+k).classList.toggle("warn",!FIN[pp.key].auto&&!pp.mnd);});
   $("calc1").innerHTML=MODE==="wp"?`Stroom <b>${eur(d.stroomNa)}</b> + gas <b>${eur(d.gasMnd)}</b> = <b>${eur(d.oud)}</b> p/m zonder warmtepomp<br>Gas −70%: <b>${n(d.gasBesp)} m³</b> minder · besparing op gas <b>${eur(d.gasBespMnd)}</b> p/m`:`Totaal verbruik <b>${n(d.totVerbruik)} kWh</b> · direct <b>${n(d.directPct)}%</b><br>Stroom stijgt van <b>${eur(d.stroomNu)}</b> naar <b>${eur(d.stroomNa)}</b> p/m (<b>+${eur(d.stroomNa-d.stroomNu)}</b>)<br>Totaal zonder plan: <b>${eur(d.oud)}</b> p/m · <b>${eur(d.oud*12)}</b> p/j`;
   $("calc2").innerHTML=`Eigen investering <b>${eur(d.eigen)}</b> · na teruggave <b>${eur(d.nettoEigen)}</b>${d.over>0?" · over <b>"+eur(d.over)+"</b>":""}<br>Financiering totaal <b>${eur(d.finBedrag)}</b> · <b>${eur(d.finMnd)}</b> p/m<br>Nieuwe maandlast <b>${eur(d.nieuw)}</b> · verschil <b>${(d.verschil>=0?"+":"−")+eur(Math.abs(d.verschil))}</b> p/m`;
   const pages=MODE==="bat"?[p1,p2,p4,p6,p7,p5]:MODE==="wp"?[p1,p2,p4,pWP,p5]
     :[p1,p2,p3,p4,...(d.kstarOn==="nee"?[]:[p6,p7]),...(d.wpOn==="nee"?[]:[pWP]),p5];
   $("stage").innerHTML=pages.map(f=>`<div class="pagewrap">${f(d)}</div>`).join("");
   fit();
-  try{localStorage.setItem(STORE,JSON.stringify(Object.fromEntries(FIELDS.map(f=>[f,$(f).value]))))}catch(e){}
+  try{localStorage.setItem(STORE,JSON.stringify(Object.fromEntries(FIELDS.map(f=>[f,getF(f)]))))}catch(e){}
 }
 
 /* ---------- invoer ---------- */
@@ -1100,16 +1129,24 @@ if(MODE==="bat")$("frankLbl").textContent="Stroom bij Frank Energie met batterij
 if(MODE==="wp")$("frankLbl").textContent="Stroom en gas bij Frank Energie met warmtepomp, p/m (€)";
 document.querySelector(".side h1").textContent="Bespaarplan "+(MODE==="drie"?"Generator":TITLES[MODE]);
 $("wpModel").addEventListener("change",()=>{$("isde").value=WP[$("wpModel").value].isde;render();});
-try{const s=JSON.parse(localStorage.getItem(STORE)||"null");if(s)FIELDS.forEach(f=>{if(s[f]!==undefined)$(f).value=s[f]})}catch(e){}
+try{const s=JSON.parse(localStorage.getItem(STORE)||"null");if(s){
+  if(s.useS===undefined&&s.fin){ /* oude opslag omzetten */
+    const m={svn:["S"],wf:["W"],combi:["S","W"]}[s.fin]||["W"];
+    s.useS=m.includes("S")?"1":"";s.useW=m.includes("W")?"1":"";s.useG="";
+    const a=m[0];s["finBedrag"+a]=s.finBedrag;s["rente"+a]=s.rente;s["looptijd"+a]=s.looptijd;s["finMnd"+a]=s.finMnd;
+    if(m[1]){s.finBedragW=s.finBedrag2;s.renteW=s.rente2;s.looptijdW=s.looptijd2;s.finMndW=s.finMnd2;}
+  }
+  FIELDS.forEach(f=>{if(s[f]!==undefined&&s[f]!==null)setF(f,s[f])});}}catch(e){}
 syncFin();
 $("f").addEventListener("input",render);
 $("f").addEventListener("submit",e=>e.preventDefault());
-function syncFin(){const c=$("fin").value==="combi";document.querySelectorAll("[data-combi]").forEach(el=>{el.hidden=!c});
-  $("finBedragLbl").textContent=c?"Gefinancierd via SVn (€)":"Gefinancierd bedrag (€)";}
-$("fin").addEventListener("change",()=>{const v=$("fin").value;$("rente").value=v==="combi"?FIN.svn.rente:FIN[v].rente;if(v==="combi"){$("rente2").value=FIN.wf.rente;}syncFin();render();});
+function syncFin(){["S","W","G"].forEach(k=>{$("blk"+k).hidden=!$("use"+k).checked});}
+["S","W","G"].forEach(k=>$("use"+k).addEventListener("change",e=>{
+  if(!["S","W","G"].some(x=>$("use"+x).checked)){e.target.checked=true;status("Kies minstens één financiering.");}
+  syncFin();render();}));
 $("btnNew").addEventListener("click",()=>{$("confirmNew").hidden=false});
 $("noNew").addEventListener("click",()=>{$("confirmNew").hidden=true});
-$("yesNew").addEventListener("click",()=>{FIELDS.forEach(f=>{if(["fin","rente","looptijd","tarief","kstarOn","wpOn","omv","mods","wpModel","lang","rente2","looptijd2"].includes(f))return;$(f).value=""});$("confirmNew").hidden=true;render();$("naam").focus();});
+$("yesNew").addEventListener("click",()=>{FIELDS.forEach(f=>{if(["tarief","kstarOn","wpOn","omv","mods","wpModel","lang","useS","useW","useG","renteS","renteW","looptijdS","looptijdW","looptijdG"].includes(f))return;setF(f,"")});$("confirmNew").hidden=true;render();$("naam").focus();});
 window.addEventListener("resize",fit);
 
 /* ---------- adviseur ---------- */
@@ -1120,6 +1157,8 @@ $("advBox").addEventListener("input",()=>{try{localStorage.setItem(ADVKEY,JSON.s
 /* ---------- PDF ---------- */
 const status=t=>$("status").textContent=t;
 $("btnPdf").addEventListener("click",async()=>{
+  if($("useG").checked&&(!($("renteG").value)||!($("finMndG").value))){status("Vul bij GroenBudget de rente en het maandbedrag in.");$("status").classList.add("warn");$("renteG").focus();return;}
+  if([..."SWG"].some(k=>$("use"+k).checked&&!num("finBedrag"+k))){status("Vul bij elke gekozen financiering het bedrag in.");$("status").classList.add("warn");return;}
   if(!$("advNaam").value.trim()||!$("advMail").value.trim()||!$("advTel").value.trim()){status("Vul eerst je eigen naam, e-mail en telefoon in bij Jouw gegevens.");$("status").classList.add("warn");$("advNaam").focus();return;}
   $("status").classList.remove("warn");
   const btn=$("btnPdf");btn.disabled=true;status("PDF wordt gemaakt…");
